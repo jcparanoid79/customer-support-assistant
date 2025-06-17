@@ -35,3 +35,18 @@ env/
 # Misc
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+*.logs
+
+# Coverage
+.coverage   
+coverage.*
+
+# test results
+nosetests.xml
+
+# text files
+*.txt
+

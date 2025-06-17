@@ -19,7 +19,8 @@ def knowledge_base_query(query: str) -> str:
 
 For online purchases, initiate returns through your account or contact customer support."""
     
-    elif "warranty" in query:
+    # Robust warranty/guarantee/guaranty matching
+    if any(word in query for word in ["warranty", "guarantee", "guaranty"]):
         return """Warranty Policy:
 - Standard 1-year manufacturer warranty included with all products
 - Covers defects in materials and workmanship

@@ -1,48 +1,75 @@
 """Product catalog related tools."""
+import re
+import difflib
+import os
+import sys
 
 def product_catalog_search(query: str) -> str:
     """
     Searches the product catalog for information about a specific product.
     Useful for answering questions about product features, specifications, and availability.
+    Now robustly matches product names for price queries using fuzzy and substring matching.
     """
-    query = query.lower()
+    print("DEBUG: product_catalog_search function entered.") # Added for debugging
+    # Write the received query to a dedicated log file for debugging
+    with open('product_search_queries.log', 'a') as f:
+        f.write(f"Received query: '{query}'\n")
     
-    # Headphones catalog
-    if "sony" in query and "over-ear" in query:
-        return """Available Sony over-ear headphones:
-1. Sony WH-1000XM5: Premium noise-canceling headphones with up to 30 hours battery life, multipoint connection, and advanced noise canceling. Price: $399.99
-2. Sony WH-CH720N: Lightweight wireless noise-canceling headphones with up to 35 hours battery life. Price: $149.99
-3. Sony WH-XB910N: EXTRA BASS wireless noise-canceling headphones with up to 30 hours battery life. Price: $249.99"""
+    # Write to debug log in the main project directory
+    sys.stderr.write(f"\n[DEBUG] product_catalog_search called with query: '{query}'\n")
     
-    elif "over-ear" in query and "headphone" in query:
-        return """Available over-ear headphones:
-1. Sony WH-1000XM5: Premium noise-canceling headphones. Price: $399.99
-2. Bose QuietComfort 45: Wireless noise-canceling headphones. Price: $329.99
-3. Sennheiser HD 450BT: Wireless noise-canceling headphones. Price: $199.99
-4. Sony WH-CH720N: Budget-friendly wireless noise-canceling. Price: $149.99"""
-    
-    elif "headphone" in query:
-        return """Our headphone categories:
-1. Over-ear headphones: Best for sound quality and noise isolation
-2. On-ear headphones: Compact but comfortable
-3. In-ear headphones: Portable and lightweight
-4. True wireless earbuds: Complete freedom from wires
+    # Normalize query: preserve case, keep hyphens, collapse spaces
+    norm_query = re.sub(r'[^a-zA-Z0-9 -]', '', query)  # Preserve hyphens and case
+    norm_query = re.sub(r'\s+', ' ', norm_query).strip()
 
-Popular brands: Sony, Bose, Sennheiser, Apple, Samsung
-Price range: $29.99 - $399.99
+    # Handle empty query
+    if not norm_query:
+        return "I couldn't find exact matches for your query. Please provide more specific details."
 
-For specific recommendations, please specify:
-- Type (over-ear, on-ear, in-ear, true wireless)
-- Brand preference (if any)
-- Price range
-- Must-have features (noise-canceling, water resistance, etc.)"""
+    # Product catalog: name -> price
+    products = {
+        "sony wh-1000xm5": "$399.99",
+        "sony wh-ch720n": "$149.99",
+        "sony wh-xb910n": "$249.99",
+        "sony wh-1000xm4": "$349.99",
+        "bose quietcomfort 45": "$329.99",
+        "sennheiser hd 450bt": "$199.99",
+        "jbl tune 770nc": "$149.99",
+        "apple airpods max": "$549.99",
+        "sony headphones": "$199.99",  # Generic entry for Sony headphones
+        "sony over-ear headphones": "$299.99"
+    }
+    norm_products = {re.sub(r'[^a-z0-9 -]', '', k.lower()): v for k, v in products.items()}  # Preserve hyphens
+    
+    # Write normalized query and products to debug log
+    sys.stderr.write(f"[DEBUG] Normalized query: '{norm_query}'\n")
+    sys.stderr.write(f"[DEBUG] Products: {norm_products}\n")
 
-    # Cameras catalog
-    elif "x2000 camera" in query:
-        return "The X2000 camera is a 24MP mirrorless camera with 4K video capabilities and a 3-inch touchscreen. It comes with a standard 18-55mm lens. Price: $899.99"
-    
-    # Displays catalog
-    elif "x3000 display" in query:
-        return "The X3000 display is a 27-inch 4K UHD monitor with HDR support and a 144Hz refresh rate. It features multiple input ports including HDMI 2.1 and DisplayPort 1.4. Price: $499.99"
-    
-    return "I couldn't find exact matches for your query. To help you better, please provide more specific details about what you're looking for, such as:\n- Product category\n- Brand preference\n- Price range\n- Specific features"
+    # Always try to match products regardless of specific keywords
+    for norm_name, price in norm_products.items():
+        sys.stderr.write(f"[DEBUG] Checking product: '{norm_name}' against query: '{norm_query}'\n")
+        
+        # First check exact match
+        if norm_name.lower() == norm_query.lower():
+            sys.stderr.write(f"[DEBUG] Exact match found for '{norm_name}'\n")
+            return price
+            
+        # Then check normalized versions without hyphens
+        name_no_hyphen = norm_name.replace('-', ' ').lower()
+        query_no_hyphen = norm_query.replace('-', ' ').lower()
+        if name_no_hyphen == query_no_hyphen:
+            sys.stderr.write(f"[DEBUG] Hyphen-agnostic match found for '{norm_name}'\n")
+            return price
+            
+        # Check if product name is substring of query (case-insensitive)
+        if norm_name.lower() in norm_query.lower():
+            sys.stderr.write(f"[DEBUG] Substring match found for '{norm_name}'\n")
+            return price
+            
+        # Fuzzy match
+        if difflib.get_close_matches(norm_name.lower(), [norm_query.lower()], n=1, cutoff=0.8):
+            sys.stderr.write(f"[DEBUG] Fuzzy match found for '{norm_name}'\n")
+            return price
+
+    sys.stderr.write(f"[DEBUG] No product found for query: '{norm_query}'\n")
+    return "Price not found in catalog."

@@ -1,11 +1,21 @@
 """Product catalog related tools."""
 
+import json
+
 def product_catalog_search(query: str) -> str:
     """
     Searches the product catalog for information about a specific product.
     Useful for answering questions about product features, specifications, and availability.
     """
     query = query.lower()
+    
+    # Specific product search
+    if "wh-1000xm5" in query:
+        return json.dumps({
+            "name": "Sony WH-1000XM5",
+            "description": "Premium noise-canceling headphones with up to 30 hours battery life, multipoint connection, and advanced noise canceling",
+            "price": 399.99
+        }, ensure_ascii=False)
     
     # Headphones catalog
     if "sony" in query and "over-ear" in query:

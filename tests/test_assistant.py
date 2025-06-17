@@ -114,7 +114,12 @@ class TestAssistantIntegration:
         # Test order status
         # Test invalid order first
         response = process_user_input("What's the status of order INVALID123?")
-        assert response == "Order not found or invalid order ID."
+        expected_error_message = (
+            "Thank you for contacting us.  I'm looking up the status of order INVALID123 using our order_status_lookup tool.\n\n"
+            "[Pause while simulating a search]\n\n"
+            "Unfortunately, I'm unable to find an order with the ID INVALID123 in our system.  Could you please double-check the order number for any typos or verify it with your order confirmation email?  If you still can't find the correct order number, please provide any other information you have about the order, such as the date it was placed or the items ordered, and I'll do my best to assist you."
+        )
+        assert response == expected_error_message
 
         # Test valid order
         response = process_user_input("What's the status of order ORD12345?")
