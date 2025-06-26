@@ -1,0 +1,88 @@
+@startuml RAG_Agent_Architecture
+
+skinparam componentStyle uml2
+skinparam backgroundColor white
+skinparam defaultFontSize 14
+skinparam defaultFontName Arial
+
+' Define components
+rectangle "User Interface Layer" {
+    [Input Handler] as IH
+    [Response Formatter] as RF
+    [Web Interface] as WI
+}
+
+rectangle "Core Processing Layer" {
+    [LLM Pipeline] as LLM
+    [Tool Router] as TR
+    [State Manager] as SM
+    [Response Generator] as RG
+}
+
+rectangle "Tool Framework" {
+    [Product Catalog Tool] as PCT
+    [Knowledge Base Tool] as KBT
+    [Order Status Tool] as OST
+}
+
+database "Data Storage" {
+    [Product Database] as PDB
+    [Knowledge Base] as KB
+    [Order System] as OS
+    [Vector Store] as VS
+}
+
+rectangle "Monitoring & Logging" {
+    [Debug Logger] as DL
+    [Performance Monitor] as PM
+    [Error Tracker] as ET
+}
+
+' Define relationships
+IH -down-> LLM : User Query
+LLM -down-> TR : Processed Query
+TR -down-> PCT : Product Queries
+TR -down-> KBT : Policy Queries
+TR -down-> OST : Order Queries
+
+PCT -down-> PDB : Fetch Data
+KBT -down-> KB : Fetch Data
+OST -down-> OS : Fetch Data
+KBT -down-> VS : Semantic Search
+
+PCT -up-> RG : Tool Response
+KBT -up-> RG : Tool Response
+OST -up-> RG : Tool Response
+
+RG -up-> RF : Final Response
+RF -up-> WI : Display Response
+
+' Monitoring connections
+DL -up-> TR : Log Operations
+DL -up-> RG : Log Responses
+PM -up-> LLM : Monitor Performance
+ET -up-> TR : Track Errors
+
+' Add notes
+note right of LLM
+  Google Gemini 1.5
+  Flash Model
+end note
+
+note right of TR
+  LangGraph-based
+  Workflow Management
+end note
+
+note right of VS
+  Chroma Vector DB
+  for Semantic Search
+end note
+
+note right of DL
+  Comprehensive Logging
+  System with Multiple
+  Output Streams
+end note
+
+@enduml

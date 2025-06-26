@@ -3,17 +3,29 @@ Customer Support Assistant Documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User Guide
 
    overview
    installation
    usage
    architecture
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Technical Documentation
+
+   detailed_documentation
    api
    tools
    development
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
    contributing
    changelog
+   troubleshooting
 
 Overview
 --------
